@@ -1,7 +1,7 @@
 
 function(input, output, session) {
   
-  #------------------------------------------------ question 1
+  #----------------------------------------------------- question 1
   
   # Structure
   output$structure <- renderPrint(
@@ -13,10 +13,40 @@ function(input, output, session) {
   # Summary
   output$summary <- renderPrint(
     my_data %>% 
-      summary()
+      summary() # xem tong quat
+  )
+  
+  # Downloadable csv of selected dataset ----
+  output$downloadData <- downloadHandler(
+    filename = function() {
+      paste('player-2020', ".csv", sep = "")
+    },
+    content = function(file) {
+      write.csv(my_data, file, row.names = FALSE)
+    }
   )
   
   # Data Table output
+  
+  output$dataFilter <- renderDataTable({
+    
+    if(is.null(input$filter_1) & is.null(input$filter_2) & is.null(input$filter_3)) {
+      my_data
+    } else if(!is.null(input$filter_1 )) {
+        if(is.null(input$filter_2) && is.null(input$filter_3) ) {
+            filter(my_data, my_data$nationality == input$filter_1)
+        } else if(!is.null(input$filter_2) & !is.null(input$filter_3)) {
+            filter(my_data, my_data$nationality == input$filter_1 & my_data$club == input$filter_2 & my_data$age==input$filter_3)
+        } else if(!is.null(input$filter_2) & is.null(input$filter_3)) {
+          filter(my_data, my_data$nationality == input$filter_1 & my_data$club == input$filter_2)
+        } else if(is.null(input$filter_2) & !is.null(input$filter_3)) {
+          filter(my_data, my_data$nationality == input$filter_1 & my_data$age == input$filter_3)
+        }
+    } else {
+      my_data
+    }
+      
+  })
   
   output$dataTable <- renderDataTable( # lam sach dataset
     if(is.null(input$checkGroupClear)) { # dont choose checkbox
@@ -43,7 +73,73 @@ function(input, output, session) {
     gg_miss_var(my_data_raw %>% janitor::clean_names())
   })
   
-  #-----
+  #----------------------------------------------------------------- question 2 -------------------------------
+  
+  # statistical trends player
+  
+  output$trends_player <- renderPlotly({
+    my_data_head100 %>% 
+      plot_ly() %>%
+      add_bars(x=~nationality, y=~get(input$select_var1)) %>% 
+      layout(title = paste(input$select_var1, "của các cầu thủ"),
+             xaxis = list(title = "Quốc gia"),
+             yaxis = list(title =  input$select_var1 ))
+  })
+  
+  # Rendering the box header
+  output$head1 <- renderText(
+    paste("5 Quốc gia cầu thủ có", input$select_var1, "cao nhất")
+  )
+
+  # Rendering the box header
+  output$head2 <- renderText(
+    paste("5 Quốc gia cầu thủ có", input$select_var1, "thấp nhất")
+  )
+
+  # rendering table with 5 nationality 
+  output$top5_nationality <- renderTable({
+    my_data %>%
+      select(nationality, input$select_var1) %>%
+      arrange(desc(get(input$select_var1))) %>%
+      head(5)
+  })
+
+  # rendering table with 5 nationality 
+  output$low5_nationality <- renderTable({
+    my_data %>%
+      select(nationality, input$select_var1) %>%
+      arrange(get(input$select_var1)) %>%
+      head(5)
+  })
+  
+  #  correlation plot
+  output$correlation_plot <- renderPlotly({
+    my_df <- my_data %>% select("age", "potential", "value", "wage")
+
+    # Compute a correlation matrix
+    corr <- round(cor(my_df), 1)
+
+    # Compute a matrix of correlation p-values
+    p.mat <- cor_pmat(my_df)
+
+    corr.plot <- ggcorrplot(
+      corr,
+      hc.order = TRUE,
+      lab= TRUE,
+      outline.col = "white",
+      p.mat = p.mat
+    )
+    ggplotly(corr.plot)
+
+  })
+  
+  # distribution plot
+  output$distribution <- renderPlotly({
+    p = my_data %>%
+      plot_ly() %>%
+      add_histogram(~get(input$select_distribution)) %>%
+      layout(xaxis = list(title = input$select_distribution), yaxis = list(title = 'Số lượng'))
+  })
   
   # #For histogram - distribution charts
   # output$histplot <- renderPlotly({
@@ -82,65 +178,8 @@ function(input, output, session) {
   #   ggplotly(p)
   # })
   # 
-  # ## Correlation plot
-  # output$cor <- renderPlotly({
-  #   my_df <- my_data %>% 
-  #     select(-State)
-  #   
-  #   # Compute a correlation matrix
-  #   corr <- round(cor(my_df), 1)
-  #   
-  #   # Compute a matrix of correlation p-values
-  #   p.mat <- cor_pmat(my_df)
-  #   
-  #   corr.plot <- ggcorrplot( 
-  #     corr,
-  #     hc.order = TRUE, 
-  #     lab= TRUE,
-  #     outline.col = "white",
-  #     p.mat = p.mat
-  #   )
-  #   
-  #   ggplotly(corr.plot)
-  #   
-  # })
   # 
-  # ### Bar Charts - State wise trend
-  # output$bar <- renderPlotly({
-  #   my_data %>% 
-  #     plot_ly() %>% 
-  #     add_bars(x=~State, y=~get(input$var2)) %>% 
-  #     layout(title = paste("Statewise Arrests for", input$var2),
-  #            xaxis = list(title = "State"),
-  #            yaxis = list(title = paste(input$var2, "Arrests per 100,000 residents") ))
-  # })
-  # 
-  # # Rendering the box header
-  # output$head1 <- renderText(
-  #   paste("5 sates with high rate of", input$var2, "Arrests")
-  # )
-  # 
-  # # Rendering the box header
-  # output$head2 <- renderText(
-  #   paste("5 sates with low rate of", input$var2, "Arrests")
-  # )
-  # 
-  # # rendering table with 5 states with high arrests for specfic crime type
-  # output$top5 <- renderTable({
-  #   my_data %>%
-  #     select(State, input$var2) %>%
-  #     arrange(desc(get(input$var2))) %>%
-  #     head(5) 
-  # })
-  # 
-  # # rendering table with 5 states with low arrests for specfic crime type
-  # output$low5 <- renderTable({
-  #   my_data %>%
-  #     select(State, input$var2) %>%
-  #     arrange(get(input$var2)) %>%
-  #     head(5)
-  # })
-  # 
+  
   # # Choropleth map
   # output$map_plot <- renderPlot({
   #   new_join %>% 

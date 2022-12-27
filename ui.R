@@ -13,29 +13,22 @@ dashboardPage(
       menuItem("1. Làm sạch dữ liệu", tabName = "question_1"),
       # --------------------------------
       menuItem("2. Phân tích thống kê", tabName = 'question_2'),
-        # conditional 
-        # conditionalPanel("input.sidebar=='viz' && input.t2=='distro' ",
-        #     selectInput(inputId = "var1", label="Chọn biến", choices = c1)),
-        # # condition 
-        # conditionalPanel("input.sidebar=='viz' && input.t2=='trends' ",
-        #     selectInput(inputId = "var2", label="Chọn loại Arrest", choices = c2)),
-        # # condition
-        # conditionalPanel("input.sidebar=='viz' && input.t2=='relation' ",
-        #     selectInput(inputId = "var3", label="Select the X variable", choices = c1, selected = "Rape")),
-        # # condition
-        # conditionalPanel("input.sidebar=='viz' && input.t2=='relation' ",
-        #     selectInput(inputId = "var4", label="Select the Y variable", choices = c1, selected = "Assault")),
+        conditionalPanel("input.sidebar=='question_2' && input.tab2 == 'trends' ",
+            selectInput(inputId = "select_var1", label="Chọn biến", choices = c1)), 
+        conditionalPanel("input.sidebar == 'question_2' && input.tab2 == 'tab_distribution' ",
+            selectInput(inputId = "select_distribution", label="Chọn biến", choices = my_data %>% select("age", "potential", "value", "wage") %>% names() )),
       # ---------------------------------
       menuItem("3. Mô hình hồi quy tuyến tính", tabName = "question_3")
     )
   ),
   #---------------
   dashboardBody(
+    tags$style(".downloadbtn { margin-top:40px }"),
     tabItems(
-      #----------first tab item
+      #---------- first tab item
       tabItem(tabName = "question_1",
               #tab box
-              tabBox(id="tab_1", width = 12,
+              tabBox(id="tab1", width = '100%',
                      tabPanel("About", icon=icon("address-card"), 
                          fluidRow(
                            column(width = 8, tags$img(src="player.jpg", width=840, height=570),
@@ -50,34 +43,48 @@ dashboardPage(
                         )
                      ),
                      tabPanel(title = "Data", icon=icon("table"),
-                              style='overflow-x: scroll; height:600px', 
                               fluidRow(
                                 column(2, checkboxGroupInput("checkGroupClear", label = h4("Làm sạch"), choices = list("Cột" = "row", "NULL" = "NA"), selected = NULL,inline=TRUE)),
-                                column(6, textInput("valueReplace", label = h4("Thay thế NA"), value = '', width = '300px',)),
+                                column(3, textInput("valueReplace", label = h5("Thay thế NA"), value = '', width = '300px')),
+                                column(3, downloadButton("downloadData", "Download", class='downloadbtn')),
                               ),
-                              withSpinner(dataTableOutput("dataTable")),
+                              tags$div(withSpinner(dataTableOutput("dataTable")), style='overflow-x: scroll; height:510px'),
+                     ),
+              )
+      ),
+      #------------ second tab item 
+      tabItem(tabName = 'question_2',
+              tabBox(id="tab2", width = 12,
+                     tabPanel(title = 'Bộ lọc', value='fliter',  
+                              fluidRow(
+                                column(2, h4('Chọn bộ lọc'), 
+                                       selectInput(inputId = 'filter_1',label = "Quốc gia", choices = my_data %>% select("nationality"), multiple = TRUE,),
+                                       selectInput(inputId = 'filter_2',label = "Câu lạc bộ", choices = my_data %>% select("club"),   multiple = TRUE,),
+                                       selectInput(inputId = 'filter_3',label = "Tuổi", choices = my_data %>% select("age"), multiple = TRUE, ),                           
+                                ),
+                                column(10,  tags$div( style='overflow-x: scroll; height:600px', withSpinner(dataTableOutput("dataFilter")))), 
+                              )
+                              
                      ),
                      tabPanel(title="Chart NA", icon=icon("uncharted"), withSpinner(plotlyOutput("chart_na"))),
                      tabPanel(title="Structure", icon=icon("uncharted"), verbatimTextOutput("structure")),
                      tabPanel(title="Sumary Status", icon=icon("chart-pie"), verbatimTextOutput("summary")),
-              )
-      ),
-      #------------second tab item or landing page...
-      tabItem(tabName = 'question_2',
-              # tabBox(id="t2", width = 12,
-              #        tabPanel("Crime Trends by State", value="trends", 
-              #             fluidRow(
-              #               tags$div(align="center", box(tableOutput("top5"), title = textOutput("head1"), collapsible = TRUE, 
-              #                     status = "primary", collapsed = TRUE, solidHeader = TRUE)),
-              #               tags$div(align="center", box(tableOutput("low5"), title = textOutput("head2"), collapsible = TRUE, 
-              #                     status = "primary", collapsed = TRUE, solidHeader = TRUE))
-              #             ),withSpinner(plotlyOutput("bar"))),
+                     tabPanel("Xu hướng cầu thủ", value="trends",
+                          fluidRow(
+                            tags$div(align="center", box(tableOutput("top5_nationality"), title = textOutput("head1"), collapsible = TRUE,
+                                  status = "primary", collapsed = TRUE, solidHeader = TRUE)),
+                            tags$div(align="center", box(tableOutput("low5_nationality"), title = textOutput("head2"), collapsible = TRUE,
+                                  status = "primary", collapsed = TRUE, solidHeader = TRUE))
+                          ),withSpinner(plotlyOutput("trends_player", height = '500px'))),
+                     tabPanel(title = 'Tương quan', plotlyOutput("correlation_plot")),
+                     tabPanel(title = 'Phân bố', value = 'tab_distribution', withSpinner(plotlyOutput("distribution")))
+                     
               #        tabPanel(title = "Distribution", value="distro", plotlyOutput("histplot")),
               #        tabPanel(title="Correlation Matrix", plotlyOutput("cor")),
               #        tabPanel(title="Sumary Status", value = "relation", 
               #           radioButtons(inputId = "fit", label = "Select smooth method", choices = c("loess", "lm"), inline = TRUE),      
               #                 withSpinner(plotlyOutput("scatter")))
-              # )
+              )
       ),
       #-------------- third tab Item
       tabItem(tabName = "question_3",
