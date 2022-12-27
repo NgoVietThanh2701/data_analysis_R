@@ -135,74 +135,46 @@ function(input, output, session) {
   
   # distribution plot
   output$distribution <- renderPlotly({
-    p = my_data %>%
+      my_data %>%
       plot_ly() %>%
       add_histogram(~get(input$select_distribution)) %>%
       layout(xaxis = list(title = input$select_distribution), yaxis = list(title = 'Số lượng'))
   })
   
-  # #For histogram - distribution charts
-  # output$histplot <- renderPlotly({
-  #   p1 = my_data %>%
-  #     plot_ly() %>%
-  #     add_histogram(~get(input$var1)) %>%
-  #     layout(xaxis = list(title = input$var1))
-  #   
-  #   # box plot
-  #   p2 = my_data %>% 
-  #     plot_ly() %>%
-  #     add_boxplot(~get(input$var1)) %>%
-  #     layout(yaxis = list(showticklabels = F))
-  #   
-  #   #  stacking the plots on top of each other
-  #   subplot(p2, p1, nrows = 2) %>%
-  #    hide_legend() %>%  # an chu thich
-  #     layout(title = "distribution chart - Histogram and Boxplot",
-  #            yaxis = list(title = "Frequency"))
-  #   
-  # })
-  # 
-  # # scatter charts
-  # output$scatter <- renderPlotly({
-  #   # creating scatter plot for ralationship using ggplot
-  #   p = my_data %>%
-  #     ggplot(aes(x=get(input$var3), y=get(input$var4))) +
-  #     geom_point() +
-  #     geom_smooth(method=get(input$fit)) + 
-  #     labs(title = paste("Relation b/w" , input$var3, "and" , input$var4),
-  #          x = input$var3,
-  #          y = input$var4) +
-  #     theme(plot.title = element_textbox_simple(size=10, halign=0.5))
-  #   
-  #   # applied ggplot to make it interactive
-  #   ggplotly(p)
-  # })
-  # 
-  # 
+  # discrete var
+  output$plot_age <- renderPlot({
+    age_group <-cut(my_data$age, breaks = c(18, 21 ,24, 27, 30, 34, 41))
+    weight <- cut(my_data$weight, 2)
+    group <-table(cut(my_data$weight , 2), age_group)
+    barplot(group, main="Thống kê cân nặng của cầu thủ theo nhóm tuổi",
+            beside=TRUE, xlab="Nhóm tuổi", ylab = 'Tần suất', col = c("red","green"))
+    legend("topleft", c('(59,79.5]', '(79.5,100]'), fill = c("red","green"))
+  })
   
-  # # Choropleth map
-  # output$map_plot <- renderPlot({
-  #   new_join %>% 
-  #     ggplot(aes(x=long, y=lat,fill=get(input$crimetype) , group = group)) +
-  #     geom_polygon(color="black", size=0.4) +
-  #     scale_fill_gradient(low="#73A5C6", high="#001B3A", name = paste(input$crimetype, "Arrest rate")) +
-  #     theme_void() +
-  #     labs(title = paste("Choropleth map of", input$crimetype , " Arrests per 100,000 residents by state in 1973")) +
-  #     theme(
-  #       plot.title = element_textbox_simple(face="bold", 
-  #                                           size=18,
-  #                                           halign=0.5),
-  #       
-  #       legend.position = c(0.2, 0.1),
-  #       legend.direction = "horizontal"
-  #       
-  #     ) +
-  #     geom_text(aes(x=x, y=y, label=abb), size = 4, color="white")
-  #   
-  #   
-  #   
-  # })
-  # 
+  # ---------------------------------------------- linear regression
+  
+  # height & weight
+  
+  linear_model1 <- lm(my_data$weight ~ my_data$height, data = my_data)
+  
+  output$summary1 <- renderPrint({
+    summary(linear_model1)
+  })
+  
+  output$anova1 <- renderPrint({
+    anova(linear_model1) # phuong sai
+  })
+  
+  output$plot_linear1 <- renderPlot({
+    plot(my_data$height, my_data$weight, pch=18, ylab="Cân nặng", xlab = "Chiều cao", col='blue')
+    abline(linear_model1, lwd=2, col='red')
+    abline(lm(my_data$weight ~ my_data$weight), col='green')
+  })
+  
+  output$resi_plot1 <- renderPlot({
+    res = resid(linear_model1)
+    hist(res) # dao động dư = gt quan sát - gt tiên lượng
+  })
 }
 
 

@@ -23,7 +23,7 @@ library(mice)
 # pct_miss(my_data_raw) - get % var is NA
 # is.na(X) - check true false NA
 # mean(column) : trung binh 
-
+# table(cut(my_data$age, 10)): chia age thanh 10 doan
 
 # ---------------------------------------------- choose dataset -----------------------------
 
@@ -45,6 +45,13 @@ c1 = my_data %>%
   select("overall", "potential", "value", "wage", "age") %>% 
   names()
 
+# age_group <-cut(my_data$age, breaks = c(18, 21 ,24, 27, 30, 34, 41))
+# weight <- cut(my_data$weight, 2)
+# group <-table(cut(my_data$weight , 2), age_group)
+# barplot(group, main="Thống kê theo nhóm tuổi",
+#         beside=TRUE, xlab="Nhóm tuổi", ylab = 'Tần suất', col = c("red","green"))
+# legend("topleft", c('var1', 'aaa'), fill = c("red","green"))
+# table(weight)[2]
 
 # ---------------------------------------- linear regression ---------------------------------
 # 
@@ -55,19 +62,38 @@ c1 = my_data %>%
 #   confint(linear_model) // khoang tin cay uoc luong
 #   var(X) : xem phuong sai
 #     
-#-----------------------------------------
-
-# linear_model <- lm(my_data$weight ~ my_data$height, data = my_data) 
+#----------------------------------------- simple model
+# 
+# linear_model <- lm(my_data$weight ~ my_data$height, data = my_data)
+# res = resid(linear_model)
+# hist(res) # dao động dư = gt quan sát - gt tiên lượng
 # summary(linear_model)
-# var(my_data$weight)
 # anova(linear_model)
-# # pt: weight =  -80.56 + 0.866*height
-# # height = 170 -> weight = 66.66kg
-# # height = 175 -> weight = 70.1kg
 # plot(my_data$height, my_data$weight, pch=18, ylab="Cân nặng", xlab = "Chiều cao", col='blue')
 # abline(linear_model, lwd=2, col='red')
 
+# ------------------------------------ mutiple var
   
-  
-  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

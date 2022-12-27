@@ -17,6 +17,7 @@ dashboardPage(
             selectInput(inputId = "select_var1", label="Chọn biến", choices = c1)), 
         conditionalPanel("input.sidebar == 'question_2' && input.tab2 == 'tab_distribution' ",
             selectInput(inputId = "select_distribution", label="Chọn biến", choices = my_data %>% select("age", "potential", "value", "wage") %>% names() )),
+
       # ---------------------------------
       menuItem("3. Mô hình hồi quy tuyến tính", tabName = "question_3")
     )
@@ -24,6 +25,7 @@ dashboardPage(
   #---------------
   dashboardBody(
     tags$style(".downloadbtn { margin-top:40px }"),
+    tags$style(".qs3_tab1_linear {width: 600px; margin-top:auto}"),
     tabItems(
       #---------- first tab item
       tabItem(tabName = "question_1",
@@ -77,22 +79,34 @@ dashboardPage(
                                   status = "primary", collapsed = TRUE, solidHeader = TRUE))
                           ),withSpinner(plotlyOutput("trends_player", height = '500px'))),
                      tabPanel(title = 'Tương quan', plotlyOutput("correlation_plot")),
-                     tabPanel(title = 'Phân bố', value = 'tab_distribution', withSpinner(plotlyOutput("distribution")))
+                     tabPanel(title = 'Phân bố', value = 'tab_distribution', withSpinner(plotlyOutput("distribution"))),
+                     tabPanel(title = "Độ tuổi",value='age', withSpinner(plotOutput("plot_age")))
                      
-              #        tabPanel(title = "Distribution", value="distro", plotlyOutput("histplot")),
-              #        tabPanel(title="Correlation Matrix", plotlyOutput("cor")),
-              #        tabPanel(title="Sumary Status", value = "relation", 
-              #           radioButtons(inputId = "fit", label = "Select smooth method", choices = c("loess", "lm"), inline = TRUE),      
-              #                 withSpinner(plotlyOutput("scatter")))
               )
       ),
       #-------------- third tab Item
       tabItem(tabName = "question_3",
+              tabBox(id='tab3', width = 16,
+                tabPanel(title = 'cân nặng & chiều cao',
+                         fluidRow(
+                           column(7, withSpinner(plotOutput("plot_linear1"))),
+                           column(5, withSpinner(plotOutput("resi_plot1") ))
+                         ), 
+                         fluidRow(
+                           column(6, tabsetPanel(
+                              tabPanel("summary",verbatimTextOutput("summary1")),
+                              tabPanel('anova',verbatimTextOutput('anova1')),
+                             )),
+                           column(6,  'text...')
+                         ), 
+              
+                )
+              )
               # box(selectInput("crimetype","Select Arrest Type", choices = c2, 
               #     selected="Rape", width = 250),
               #     withSpinner(plotOutput("map_plot")), width = 12) 
               #   # withSpinner for loading 
-      )
+      ) # end tab item
     )
   )
 )
