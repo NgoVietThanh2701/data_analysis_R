@@ -14,6 +14,7 @@ library(rio) #import export
 library(tidyverse)
 library(naniar)
 library(mice)
+library(car)
 
 # -------------------------------- note function
 # names() - get name var
@@ -62,18 +63,20 @@ c1 = my_data %>%
 #   confint(linear_model) // khoang tin cay uoc luong
 #   var(X) : xem phuong sai
 #     
-#----------------------------------------- simple model
+#----------------------------------------- 
 # 
-# linear_model <- lm(my_data$weight ~ my_data$height, data = my_data)
-# res = resid(linear_model)
-# hist(res) # dao động dư = gt quan sát - gt tiên lượng
-# summary(linear_model)
-# anova(linear_model)
-# plot(my_data$height, my_data$weight, pch=18, ylab="Cân nặng", xlab = "Chiều cao", col='blue')
-# abline(linear_model, lwd=2, col='red')
+# linear_model <- lm(my_data$weight ~ my_data$age, data = my_data)
+# # res = resid(linear_model)
+# # hist(res) # dao động dư = gt quan sát - gt tiên lượng
+# # summary(linear_model)
+# # anova(linear_model)
+#  plot(my_data$age, my_data$weight, pch=18, ylab="Cân nặng", xlab = "Chiều cao", col='blue')
+#  abline(linear_model, lwd=2, col='red')
+#  abline(lm(my_data$weight ~ my_data$weight, data = my_data), lwd=2, col='red')
+# ncvTest(linear_model)
+# spreadLevelPlot(linear_model) # đồ thị chẩn đoán phương sai sai số thay đổi theo sự tăng lên của gt tiên lượng
+# crPlots(linear_model) # kiem tra tuyen tinh
 
-# ------------------------------------ mutiple var
-  
 
 
 

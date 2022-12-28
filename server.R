@@ -165,15 +165,35 @@ function(input, output, session) {
     anova(linear_model1) # phuong sai
   })
   
+  output$ncv_test <- renderPrint({
+    ncvTest(linear_model1) 
+  })
+  
   output$plot_linear1 <- renderPlot({
     plot(my_data$height, my_data$weight, pch=18, ylab="Cân nặng", xlab = "Chiều cao", col='blue')
     abline(linear_model1, lwd=2, col='red')
     abline(lm(my_data$weight ~ my_data$weight), col='green')
   })
   
-  output$resi_plot1 <- renderPlot({
+  # kiem tra dao động dư
+  output$resi_plot1 <- renderPlot({ 
     res = resid(linear_model1)
     hist(res) # dao động dư = gt quan sát - gt tiên lượng
+  })
+  
+  # kiem tra phuon sai
+  output$variance_plot1 <- renderPlot({ 
+    spreadLevelPlot(linear_model1) # đồ thị chẩn đoán phương sai sai số thay đổi theo sự tăng lên của gt tiên lượng
+  })
+  
+  # kiểm tra tính tuyến tính
+  output$non_linearity <- renderPlot({
+    crPlots(linear_model1)
+  })
+  
+  # kierm tra gia tri bien
+  output$outliers <- renderPrint({
+    outlierTest(linear_model1)
   })
 }
 

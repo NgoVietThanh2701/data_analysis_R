@@ -26,6 +26,7 @@ dashboardPage(
   dashboardBody(
     tags$style(".downloadbtn { margin-top:40px }"),
     tags$style(".qs3_tab1_linear {width: 600px; margin-top:auto}"),
+    tags$style(".p {font-size: 18px; color: red}"),
     tabItems(
       #---------- first tab item
       tabItem(tabName = "question_1",
@@ -33,15 +34,30 @@ dashboardPage(
               tabBox(id="tab1", width = '100%',
                      tabPanel("About", icon=icon("address-card"), 
                          fluidRow(
-                           column(width = 8, tags$img(src="player.jpg", width=840, height=570),
-                                 tags$br(),
-                                 tags$a("Photo by Campbell Jensen on Unsplash"), align="center"),
+                           column(width = 8, tags$img(src="player.jpg", width=830, height=570),
+                                 tags$a("Cầu thủ nổi tiếng năm 2020"), align="center"),
                            column(width = 4, 
-                                 tags$br(),
-                                 tags$p("This data set comes along with base R and contains statistics, 
-                                        in arrests per 100,000 residents for assault, murder, and rape in 
-                                        each of the 50 US states in 1973. Also, given is the percent of 
-                                        the population living in urban areas."))     
+                                 tags$p("Đây là dữ liệu thống kê về cầu thủ bóng đá năm 2020. Gồm các biến sau: "),
+                                 tags$p('ID: id cầu thủ là duy nhất'),
+                                 tags$p('Name: Tên cầu thủ'),
+                                 tags$p('Age: Tuổi cầu thủ'),
+                                 tags$p('Dob: Ngày sinh'),
+                                 tags$p('Height: Chiều cao'),
+                                 tags$p('Weight: Cân nặng'),
+                                 tags$p('Nationality: quốc gia'),
+                                 tags$p('Club: câu lạc bộ đang thi đấu'),
+                                 tags$p('Overall: đánh giá tổng quan về cầu thủ'),
+                                 tags$p('Potential: id cầu thủ là duy nhất'),
+                                 tags$p('Value: giá trị của cầu thủ'),
+                                 tags$p('Wage: Tiền lương'),
+                                 tags$p('Play Positions: chơi ở vị trí'),
+                                 tags$p('Preferred Foot: Chân thuận'),
+                                 tags$p('Skill Moves: kĩ năng di chuyển'),
+                                 tags$p('Release Clause: Khoảng tiền để giải phóng hợp đồng'),
+                                 tags$p('Jersey Number: Số áo đang mặc'),
+                                 tags$p('Joined: thời gian tham gia'),
+                                 tags$p('Contract Valid Until: thời gian hợp đồng kết thúc')
+                          )
                         )
                      ),
                      tabPanel(title = "Data", icon=icon("table"),
@@ -90,14 +106,26 @@ dashboardPage(
                 tabPanel(title = 'cân nặng & chiều cao',
                          fluidRow(
                            column(7, withSpinner(plotOutput("plot_linear1"))),
-                           column(5, withSpinner(plotOutput("resi_plot1") ))
+                           column(5, tabsetPanel(
+                             tabPanel("Dao động dư", withSpinner(plotOutput("resi_plot1"))),
+                             tabPanel("Phương sai", withSpinner(plotOutput("variance_plot1"))),
+                             tabPanel("Tính tuyến tính", withSpinner(plotOutput("non_linearity"))),
+                             ))
                          ), 
                          fluidRow(
                            column(6, tabsetPanel(
                               tabPanel("summary",verbatimTextOutput("summary1")),
                               tabPanel('anova',verbatimTextOutput('anova1')),
+                              tabPanel('Phương sai',verbatimTextOutput('ncv_test')),
+                              tabPanel('Gía trị biên',verbatimTextOutput('outliers')),
                              )),
-                           column(6,  'text...')
+                           column(6,  
+                              tags$p('Mô hình: weight = -80.56 + 0.866 * height', class='p'),
+                              tags$p('Nếu không biết height -> weight = mean(weight) = 77.46032'),
+                              tags$p('Nếu biết height ->tại height = 170 => weight = -80.56 + 0.866 * 170 = 66.66'),
+                              tags$p('Tổng số dao động: TSS = 33368 + 18991 = 52359'),
+                              tags$p('Hệ số xác định: R^2 = 33368/TSS = 63.72%')
+                            )
                          ), 
               
                 )
